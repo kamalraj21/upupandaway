@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up, Up, and Away: An Atmospheric Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            overflow-x: hidden;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 50%, #B0E2FF 100%);
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .scroll-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1;
+        }
+
+        .scroll-content {
+            height: 500vh; /* 5 sections for 5 atmospheric layers */
+            width: 100%;
+        }
+
+        .container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Hot Air Balloon */
+        .balloon-container {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            transition: all 0.5s ease;
+            pointer-events: auto;
+        }
+
+        .balloon {
+            width: 120px;
+            height: 150px;
+            position: relative;
+        }
+
+        .balloon-top {
+            width: 120px;
+            height: 130px;
+            background: linear-gradient(to bottom, #FF4136, #FF851B);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            animation: balloon-bob 3s infinite ease-in-out;
+        }
+
+        @keyframes balloon-bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .balloon-basket {
+            width: 40px;
+            height: 30px;
+            background: #8B4513;
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 0 0 5px 5px;
+        }
+
+        .balloon-string {
+            width: 2px;
+            height: 20px;
+            background: #333;
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Section Styles */
+        .section {
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .section.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(0,0,0,0.7), 0 0 20px rgba(0,0,0,0.5);
+            margin-bottom: 1rem;
+            z-index: 100;
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            padding: 15px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .section-info {
+            max-width: 800px;
+            color: white;
+            text-shadow: 0 0 10px rgba(0,0,0,0.7);
+            font-size: 1.4rem;
+            text-align: center;
+            z-index: 100;
+            margin-bottom: 2rem;
+            background: rgba(0,0,0,0.3);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            line-height: 1.6;
+        }
+
+        /* Troposphere */
+        #troposphere {
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 100%);
+        }
+
+        /* Stratosphere */
+        #stratosphere {
+            background: linear-gradient(to bottom, #4682B4 0%, #191970 100%);
+        }
+
+        /* Mesosphere */
+        #mesosphere {
+            background: linear-gradient(to bottom, #191970 0%, #000033 100%);
+        }
+
+        /* Thermosphere */
+        #thermosphere {
+            background: linear-gradient(to bottom, #000033 0%, #000000 100%);
+        }
+
+        /* Exosphere */
+        #exosphere {
+            background: radial-gradient(ellipse at bottom, #000033 0%, #000000 100%);
+        }
+
+        /* Earth */
+        .earth {
+            position: absolute;
+            bottom: -300px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #1E90FF, #228B22);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5) inset, 0 0 100px rgba(30,144,255,0.5);
+            z-index: 10;
+            transition: transform 0.5s ease;
+            overflow: hidden;
+        }
+
+        .earth:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+            animation: earth-shine 10s infinite linear;
+        }
+
+        @keyframes earth-shine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Interactive Elements */
+        .interactive {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 200;
+            animation: pulse 2s infinite;
+            pointer-events: auto;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        .interactive:hover {
+            transform: scale(1.2);
+            z-index: 300;
+        }
+
+        /* Click Hint */
+        .click-hint {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 250;
+        }
+
+        .interactive:hover .click-hint {
+            opacity: 1;
+        }
+
+        /* Clouds */
+        .cloud {
+            width: 100px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: float-cloud 20s infinite linear;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        @keyframes float-cloud {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(calc(100vw + 100px)); }
+        }
+
+        .cloud:before, .cloud:after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .cloud:before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 10px;
+        }
+
+        .cloud:after {
+            width: 60px;
+            height: 40px;
+            top: -15px;
+            right: 10px;
+        }
+
+        /* Birds */
+        .bird {
+            width: 30px;
+            height: 20px;
+            position: relative;
+            animation: fly-bird 15s infinite linear;
+        }
+
+        @keyframes fly-bird {
+            0% { transform: translateX(-50px) translateY(0); }
+            25% { transform: translateX(25vw) translateY(-20px); }
+            50% { transform: translateX(50vw) translateY(20px); }
+            75% { transform: translateX(75vw) translateY(-10px); }
+            100% { transform: translateX(calc(100vw + 50px)) translateY(0); }
+        }
+
+        .bird:before, .bird:after {
+            content: '';
+            position: absolute;
+            border: 2px solid #333;
+            border-bottom: 0;
+            width: 15px;
+            height: 10px;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .bird:before {
+            transform: rotate(-20deg);
+            left: 0;
+        }
+
+        .bird:after {
+            transform: rotate(20deg);
+            right: 0;
+        }
+
+        /* Airplane */
+        .airplane {
+            width: 60px;
+            height: 20px;
+            background: #FFF;
+            position: relative;
+            border-radius: 50% 10% 50% 10%;
+            animation: fly-plane 25s infinite linear;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fly-plane {
+            0% { transform: translateX(-100px) translateY(0); }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(0); }
+        }
+
+        .airplane:before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 10px;
+            background: #FFF;
+            top: -5px;
+            left: 10px;
+            border-radius: 50% 10% 50% 10%;
+        }
+
+        /* Ozone Layer */
+        .ozone {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,255,0.3) 0%, rgba(0,255,255,0.1) 70%);
+            box-shadow: 0 0 30px rgba(0,255,255,0.5);
+            animation: ozone-glow 3s infinite alternate;
+        }
+
+        @keyframes ozone-glow {
+            0% { box-shadow: 0 0 30px rgba(0,255,255,0.5); }
+            100% { box-shadow: 0 0 50px rgba(0,255,255,0.8); }
+        }
+
+        /* Weather Balloon */
+        .weather-balloon {
+            width: 50px;
+            height: 60px;
+            background: #FFF;
+            border-radius: 50%;
+            position: relative;
+            animation: float-balloon 30s infinite ease-in-out;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @keyframes float-balloon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .weather-balloon:after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #FF4136;
+            border-radius: 50%;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Jet Stream */
+        .jet-stream {
+            width: 200px;
+            height: 30px;
+            background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.7), rgba(255,255,255,0.1));
+            border-radius: 50px;
+            position: relative;
+        }
+
+        .jet-stream:before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+            border-radius: 50px;
+            animation: flow 3s infinite;
+        }
+
+        @keyframes flow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Meteor */
+        .meteor {
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+            animation: meteor-fall 3s infinite linear;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+
+        @keyframes meteor-fall {
+            0% { transform: translateX(0) translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(200px) translateY(200px) rotate(45deg); opacity: 0; }
+        }
+
+        .meteor:before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(to left, transparent, white);
+            top: 50%;
+            right: 5px;
+            transform: translateY(-50%);
+        }
+
+        /* Noctilucent Cloud */
+        .noctilucent-cloud {
+            width: 120px;
+            height: 40px;
+            background: rgba(200, 220, 255, 0.7);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(200, 220, 255, 0.9);
+            animation: shimmer 4s infinite alternate;
+        }
+
+        @keyframes shimmer {
+            0% { box-shadow: 0 0 15px rgba(200, 220, 255, 0.9); }
+            100% { box-shadow: 0 0 30px rgba(200, 220, 255, 1); }
+        }
+
+        /* Thermometer */
+        .thermometer {
+            width: 20px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            position: relative;
+            border: 2px solid white;
+        }
+
+        .thermometer:before {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 50px;
+            background: #0074D9;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 7px;
+        }
+
+        .thermometer:after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #0074D9;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+        }
+
+        /* ISS */
+        .iss {
+            width: 80px;
+            height: 40px;
+            background: #DDD;
+            position: relative;
+            border-radius: 5px;
+            animation: orbit-iss 20s infinite linear;
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+
+        @keyframes orbit-iss {
+            0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+        }
+
+        .iss:before {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 10px;
+            background: #AAA;
+            top: 15px;
+            left: -20px;
+        }
+
+        .iss:after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 5px;
+            background: #888;
+            top: 5px;
+            left: -10px;
+        }
+
+        /* Satellite */
+        .satellite {
+            width: 40px;
+            height: 30px;
+            background: #CCC;
+            position: relative;
+            border-radius: 5px;
+            animation: orbit-satellite 15s infinite linear;
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+
+        @keyframes orbit-satellite {
+            0% { transform: rotate(0deg) translateX(80px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
+        }
+
+        .satellite:before, .satellite:after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 20px;
+            background: #444;
+            top: 5px;
+        }
+
+        .satellite:before {
+            left: -60px;
+        }
+
+        .satellite:after {
+            right: -60px;
+        }
+
+        /* Aurora */
+        .aurora {
+            width: 300px;
+            height: 200px;
+            background: linear-gradient(to bottom, rgba(0, 255, 0, 0.2), rgba(0, 0, 255, 0.2));
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .aurora:before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 255, 0, 0.4), rgba(0, 0, 255, 0.4));
+            border-radius: 50%;
+            animation: aurora-wave 8s infinite alternate;
+        }
+
+        @keyframes aurora-wave {
+            0% { transform: translateY(20%) scaleY(0.8); }
+            100% { transform: translateY(-20%) scaleY(1.2); }
+        }
+
+        /* Info Popup */
+        .info-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 500px;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .info-popup h3 {
+            margin-bottom: 1rem;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .info-popup p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .close-popup {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #777;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .close-popup:hover {
+            color: #333;
+            background: rgba(0,0,0,0.2);
+        }
+
+        /* Stars */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        /* Shooting stars */
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(255,255,255,0.8);
+            animation: shooting-star-fall 3s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes shooting-star-fall {
+            0% { 
+                transform: translateX(0) translateY(0);
+                opacity: 1;
+            }
+            70% { 
+                opacity: 1;
+            }
+            100% { 
+                transform: translateX(-300px) translateY(300px);
+                opacity: 0;
+            }
+        }
+
+        .shooting-star:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to left, transparent, rgba(255,255,255,0.8));
+            transform: translateX(-100px);
+        }
+
+        /* Progress Indicator */
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 1000;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #FF4136, #FF851B);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255,65,54,0.5);
+        }
+
+        /* Altitude Indicator */
+        .altitude-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #333;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+            font-size: 1.1rem;
+        }
+
+        /* Sound Controls */
+        .sound-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sound-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .sound-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+
+        .sound-btn.active {
+            background: #FF4136;
+            color: white;
+        }
+
+        /* Layer Transition Effect */
+        .layer-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent, rgba(255,255,255,0.8));
+            opacity: 0;
+            pointer-events: none;
+            z-index: 200;
+            transition: opacity 1s ease;
+        }
+
+        .layer-transition.active {
+            opacity: 1;
+        }
+
+        /* Scroll Direction Indicator */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #333;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+            font-size: 1.1rem;
+        }
+
+        .scroll-arrow {
+            font-size: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Particle effects */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            animation: float-up 10s infinite linear;
+        }
+
+        @keyframes float-up {
+            0% { 
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(-100vh) translateX(20px);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2.5rem;
+                padding: 10px 20px;
+            }
+            
+            .section-info {
+                font-size: 1.1rem;
+                padding: 10px 20px;
+            }
+            
+            .earth {
+                width: 400px;
+                height: 400px;
+                bottom: -200px;
+            }
+            
+            .altitude-indicator {
+                top: 10px;
+                right: 10px;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .scroll-indicator {
+                bottom: 10px;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .sound-btn {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator">
+        <div class="progress-bar"></div>
+    </div>
+
+    <div class="altitude-indicator" id="altitude-indicator">Altitude: 0 km</div>
+
+    <div class="sound-controls">
+        <button class="sound-btn active" id="music-toggle" title="Toggle Music">🎵</button>
+        <button class="sound-btn active" id="sfx-toggle" title="Toggle Sound Effects">🔊</button>
+    </div>
+
+    <div class="scroll-indicator">
+        <span>Scroll Down to Ascend</span>
+        <span class="scroll-arrow">⬇️</span>
+    </div>
+
+    <div class="layer-transition" id="layer-transition"></div>
+
+    <div class="scroll-container" id="scroll-container">
+        <div class="scroll-content"></div>
+    </div>
+
+    <div class="container">
+        <div class="balloon-container" id="balloon-container">
+            <div class="balloon">
+                <div class="balloon-top"></div>
+                <div class="balloon-string"></div>
+                <div class="balloon-basket"></div>
+            </div>
+        </div>
+
+        <div class="stars" id="stars"></div>
+
+        <!-- Troposphere -->
+        <section id="troposphere" class="section active">
+            <h1 class="section-title">The Journey Begins: Troposphere</h1>
+            <p class="section-info">The troposphere is the lowest layer of Earth's atmosphere, extending from the surface up to about 8-15 kilometers high. This is where weather happens and where we live.</p>
+            
+            <div class="interactive cloud" style="top: 20%; left: 20%;" data-info="clouds">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive cloud" style="top: 30%; right: 25%;" data-info="clouds">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive bird" style="top: 40%; left: 30%;" data-info="birds">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive bird" style="top: 25%; right: 40%;" data-info="birds">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive airplane" style="top: 15%; left: 50%;" data-info="airplane">
+                <div class="click-hint">Click me!</div>
+            </div>
+        </section>
+
+        <!-- Stratosphere -->
+        <section id="stratosphere" class="section">
+            <h1 class="section-title">Into the Blue: Stratosphere</h1>
+            <p class="section-info">The stratosphere extends from about 15km to 50km above Earth. This layer contains the ozone layer, which protects us from harmful UV radiation.</p>
+            
+            <div class="interactive ozone" style="top: 30%; left: 40%;" data-info="ozone">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive weather-balloon" style="top: 20%; right: 30%;" data-info="weather-balloon">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive jet-stream" style="top: 40%; left: 25%;" data-info="jet-stream">
+                <div class="click-hint">Click me!</div>
+            </div>
+        </section>
+
+        <!-- Mesosphere -->
+        <section id="mesosphere" class="section">
+            <h1 class="section-title">Shooting for the Stars: Mesosphere</h1>
+            <p class="section-info">The mesosphere extends from about 50km to 85km above Earth. It's the coldest layer of the atmosphere, with temperatures dropping to -90°C. Meteors burn up in this layer.</p>
+            
+            <div class="interactive meteor" style="top: 20%; left: 30%;" data-info="meteor">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive meteor" style="top: 35%; right: 25%;" data-info="meteor">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive noctilucent-cloud" style="top: 40%; left: 45%;" data-info="noctilucent-cloud">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive thermometer" style="top: 25%; right: 40%;" data-info="thermometer">
+                <div class="click-hint">Click me!</div>
+            </div>
+        </section>
+
+        <!-- Thermosphere -->
+        <section id="thermosphere" class="section">
+            <h1 class="section-title">The Final Frontier: Thermosphere</h1>
+            <p class="section-info">The thermosphere extends from about 85km to 600km above Earth. Despite high temperatures, it would feel cold to us because the gas molecules are far apart. The International Space Station orbits here.</p>
+            
+            <div class="interactive iss" style="top: 30%; left: 40%;" data-info="iss">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive satellite" style="top: 20%; right: 30%;" data-info="satellite">
+                <div class="click-hint">Click me!</div>
+            </div>
+            <div class="interactive satellite" style="top: 40%; left: 25%;" data-info="satellite">
+                <div class="click-hint">Click me!</div>
+            </div>
+        </section>
+
+        <!-- Exosphere -->
+        <section id="exosphere" class="section">
+            <h1 class="section-title">The Edge of Space: Exosphere</h1>
+            <p class="section-info">The exosphere is the outermost layer of Earth's atmosphere, extending from about 600km to 10,000km above Earth. This is where atoms and molecules escape into space.</p>
+            
+            <div class="earth"></div>
+            <div class="interactive aurora" style="top: 30%; left: 35%;" data-info="aurora">
+                <div class="click-hint">Click me!</div>
+            </div>
+        </section>
+    </div>
+
+    <div class="info-popup" id="info-popup">
+        <span class="close-popup" id="close-popup">&times;</span>
+        <h3 id="popup-title"></h3>
+        <p id="popup-content"></p>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="background-music" loop>
+        <source src="https://www.bensound.com/bensound-music/bensound-dreams.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="click-sound">
+        <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="whoosh-sound">
+        <source src="https://www.soundjay.com/misc/sounds/whoosh-1.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="chime-sound">
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Information for interactive elements
+        const infoData = {
+            'clouds': {
+                title: 'Clouds',
+                content: 'Clouds are visible masses of water droplets or frozen crystals suspended in the atmosphere. They form when water vapor in the air cools and condenses. Clouds play a crucial role in Earth\'s weather patterns and water cycle.'
+            },
+            'birds': {
+                title: 'Birds',
+                content: 'Most birds fly in the troposphere, typically below 3,000 meters. Some birds, like the Bar-headed goose, can fly at altitudes over 8,000 meters when crossing the Himalayas. Birds have specialized respiratory systems that allow them to extract oxygen efficiently even at high altitudes.'
+            },
+            'airplane': {
+                title: 'Commercial Airplanes',
+                content: 'Commercial airplanes typically fly in the upper troposphere or lower stratosphere, at altitudes between 9,000 and 12,000 meters. This altitude is chosen because the air is thinner, reducing drag and improving fuel efficiency, and above most weather disturbances.'
+            },
+            'ozone': {
+                title: 'Ozone Layer',
+                content: 'The ozone layer is a region of the stratosphere that contains most of Earth\'s ozone. It acts as a shield, absorbing 97-99% of the Sun\'s harmful ultraviolet radiation. Without this layer, life on Earth would be exposed to dangerous levels of UV radiation.'
+            },
+            'weather-balloon': {
+                title: 'Weather Balloons',
+                content: 'Weather balloons are high-altitude balloons that carry instruments to measure atmospheric conditions like temperature, humidity, pressure, and wind speed. They can reach altitudes of 40 kilometers before bursting, and their data helps improve weather forecasts.'
+            },
+            'jet-stream': {
+                title: 'Jet Stream',
+                content: 'Jet streams are fast-flowing, narrow air currents found in the upper troposphere and lower stratosphere. They form at the boundaries of adjacent air masses with significant temperature differences. Jet streams influence weather patterns and are used by commercial aircraft to save fuel and time.'
+            },
+            'meteor': {
+                title: 'Meteors',
+                content: 'Meteors, also known as shooting stars, are space rocks that enter Earth\'s atmosphere. Most meteors burn up completely in the mesosphere due to friction with air molecules, creating the bright streaks of light we see. About 25 million meteors enter Earth\'s atmosphere every day.'
+            },
+            'noctilucent-cloud': {
+                title: 'Noctilucent Clouds',
+                content: 'Noctilucent clouds, or night-shining clouds, are the highest clouds in Earth\'s atmosphere, located in the mesosphere at about 80 kilometers altitude. They are visible only during twilight when the Sun is below the horizon but still illuminates these high-altitude clouds.'
+            },
+            'thermometer': {
+                title: 'Mesosphere Temperature',
+                content: 'The mesosphere is the coldest layer of Earth\'s atmosphere, with temperatures decreasing with altitude to as low as -90°C at its upper boundary. This extreme cold is due to decreasing air density and the inability to effectively absorb solar radiation.'
+            },
+            'iss': {
+                title: 'International Space Station',
+                content: 'The International Space Station (ISS) orbits Earth in the thermosphere at an altitude of about 400 kilometers. It travels at approximately 28,000 kilometers per hour, completing an orbit every 90 minutes. Astronauts on the ISS experience about 16 sunrises and sunsets each day.'
+            },
+            'satellite': {
+                title: 'Satellites',
+                content: 'Satellites in the thermosphere serve various purposes, including communications, weather monitoring, navigation, and scientific research. They orbit at different altitudes depending on their function, with most satellites in low Earth orbit between 160 and 2,000 kilometers above Earth.'
+            },
+            'aurora': {
+                title: 'Aurora Borealis',
+                content: 'The Aurora Borealis, or Northern Lights, is a natural light display in the sky, primarily seen in high-latitude regions. It occurs when charged particles from the Sun collide with gases in Earth\'s atmosphere, creating beautiful displays of light in various colors.'
+            }
+        };
+
+        // Create stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 300;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // Random size
+                const size = Math.random() * 3;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // Random animation delay
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                
+                starsContainer.appendChild(star);
+            }
+            
+            // Create shooting stars
+            for (let i = 0; i < 5; i++) {
+                const shootingStar = document.createElement('div');
+                shootingStar.classList.add('shooting-star');
+                
+                // Random position
+                shootingStar.style.left = `${Math.random() * 100}%`;
+                shootingStar.style.top = `${Math.random() * 50}%`;
+                
+                // Random animation delay
+                shootingStar.style.animationDelay = `${Math.random() * 10}s`;
+                
+                starsContainer.appendChild(shootingStar);
+            }
+        }
+
+        // Create particles
+        function createParticles() {
+            const container = document.querySelector('.container');
+            const numberOfParticles = 50;
+            
+            for (let i = 0; i < numberOfParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.bottom = '0';
+                
+                // Random animation delay
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Initialize stars and particles
+        createStars();
+        createParticles();
+
+        // Balloon movement on scroll
+        const balloon = document.getElementById('balloon-container');
+        const progressBar = document.querySelector('.progress-bar');
+        const altitudeIndicator = document.getElementById('altitude-indicator');
+        const layerTransition = document.getElementById('layer-transition');
+        const sections = document.querySelectorAll('.section');
+        const scrollContainer = document.getElementById('scroll-container');
+        
+        // Audio elements
+        const backgroundMusic = document.getElementById('background-music');
+        const clickSound = document.getElementById('click-sound');
+        const whooshSound = document.getElementById('whoosh-sound');
+        const chimeSound = document.getElementById('chime-sound');
+        
+        // Sound controls
+        const musicToggle = document.getElementById('music-toggle');
+        const sfxToggle = document.getElementById('sfx-toggle');
+        
+        let musicEnabled = true;
+        let sfxEnabled = true;
+        
+        musicToggle.addEventListener('click', () => {
+            musicEnabled = !musicEnabled;
+            musicToggle.classList.toggle('active');
+            
+            if (musicEnabled) {
+                backgroundMusic.play();
+            } else {
+                backgroundMusic.pause();
+            }
+        });
+        
+        sfxToggle.addEventListener('click', () => {
+            sfxEnabled = !sfxEnabled;
+            sfxToggle.classList.toggle('active');
+        });
+        
+        // Start background music
+        backgroundMusic.volume = 0.3;
+        backgroundMusic.play().catch(e => console.log('Autoplay prevented:', e));
+        
+        let currentSection = 0;
+        
+        scrollContainer.addEventListener('scroll', () => {
+            const scrollPosition = scrollContainer.scrollTop;
+            const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+            const scrollPercentage = scrollPosition / maxScroll;
+            
+            // Update progress bar
+            progressBar.style.width = `${scrollPercentage * 100}%`;
+            
+            // Calculate altitude (0 to 1000 km)
+            const altitude = Math.round(scrollPercentage * 1000);
+            altitudeIndicator.textContent = `Altitude: ${altitude} km`;
+            
+            // Move balloon based on scroll (now moving up as we scroll down)
+            const balloonPosition = scrollPercentage * 90;
+            balloon.style.bottom = `${balloonPosition}%`;
+            
+            // Rotate balloon slightly for effect
+            balloon.style.transform = `translateX(-50%) rotate(${Math.sin(scrollPosition * 0.01) * 5}deg)`;
+            
+            // Scale earth as we ascend
+            const earth = document.querySelector('.earth');
+            if (earth) {
+                const scale = 1 - (scrollPercentage * 0.5);
+                earth.style.transform = `translateX(-50%) scale(${scale})`;
+            }
+            
+            // Check for section transitions
+            const sectionIndex = Math.floor(scrollPercentage * sections.length);
+            if (sectionIndex !== currentSection && sectionIndex < sections.length) {
+                currentSection = sectionIndex;
+                
+                // Play transition sound
+                if (sfxEnabled) {
+                    chimeSound.currentTime = 0;
+                    chimeSound.play().catch(e => console.log('Sound play failed:', e));
+                }
+                
+                // Show transition effect
+                layerTransition.classList.add('active');
+                setTimeout(() => {
+                    layerTransition.classList.remove('active');
+                }, 1000);
+            }
+            
+            // Update active section
+            sections.forEach((section, index) => {
+                if (index === currentSection) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+        });
+
+        // Interactive elements
+        const interactiveElements = document.querySelectorAll('.interactive');
+        const infoPopup = document.getElementById('info-popup');
+        const popupTitle = document.getElementById('popup-title');
+        const popupContent = document.getElementById('popup-content');
+        const closePopup = document.getElementById('close-popup');
+
+        interactiveElements.forEach(element => {
+            element.addEventListener('click', () => {
+                const infoType = element.getAttribute('data-info');
+                const info = infoData[infoType];
+                
+                popupTitle.textContent = info.title;
+                popupContent.textContent = info.content;
+                infoPopup.style.display = 'block';
+                
+                // Play click sound
+                if (sfxEnabled) {
+                    clickSound.currentTime = 0;
+                    clickSound.play().catch(e => console.log('Sound play failed:', e));
+                }
+            });
+        });
+
+        closePopup.addEventListener('click', () => {
+            infoPopup.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === infoPopup) {
+                infoPopup.style.display = 'none';
+            }
+        });
+
+        // Add some animation to interactive elements
+        interactiveElements.forEach(element => {
+            // Random animation delay
+            element.style.animationDelay = `${Math.random() * 2}s`;
+        });
+
+        // Initial balloon animation
+        setTimeout(() => {
+            if (sfxEnabled) {
+                whooshSound.currentTime = 0;
+                whooshSound.play().catch(e => console.log('Sound play failed:', e));
+            }
+        }, 1000);
+
+        // Hide scroll indicator after first scroll
+        scrollContainer.addEventListener('scroll', function hideScrollIndicator() {
+            document.querySelector('.scroll-indicator').style.opacity = '0';
+            scrollContainer.removeEventListener('scroll', hideScrollIndicator);
+        });
+    </script>
+</body>
+</html>
